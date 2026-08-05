@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "jw-web",
+      "runtimeExecutable": "C:\Users\Admin\AppData\Local\Temp\claude\C--Users-Admin-Downloads\53964d91-7c42-417e-be1c-9e925603b8ad\scratchpad\node-v22.14.0-win-x64\npm.cmd",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000
+    }
+  ]
+}
