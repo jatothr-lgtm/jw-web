@@ -14,7 +14,6 @@ insert into public.plants (name, mfg_type, warehouse) values
   ('Indore', 'In House', 'RPC Indore - Finished Goods Stores - CBSPL'),
   ('Purnia', 'In House', 'RPC Purnia Finished Goods - CBSPL'),
   ('Kundli', 'In House', 'RPC Kundli - Finished Goods Stores - CBSPL'),
-  ('Udupi',  'In House', null),
   ('UD',     '3P',       'RPC UD Foods Finished Goods - CBSPL'),
   ('Rebela', '3P',       'RPC Functional & Innovative Foods Finished Goods - CBSPL')
 on conflict (name) do update
@@ -129,6 +128,16 @@ create policy "entries readable by authenticated"
 drop policy if exists "entries writable by authenticated" on public.entries;
 create policy "entries writable by authenticated"
   on public.entries for all to authenticated using (true) with check (true);
+
+-- ---------------------------------------------------------------------------
+-- Retire Udupi
+-- The plant no longer exists. This clears it out of a database that was set up
+-- before it was removed; on a fresh database these statements match nothing.
+-- Child rows go first, because both reference plants(name).
+-- ---------------------------------------------------------------------------
+delete from public.entries where plant = 'Udupi';
+delete from public.revenue where plant = 'Udupi';
+delete from public.plants  where name  = 'Udupi';
 
 -- ---------------------------------------------------------------------------
 -- Convenience view used by the dashboard and the Google Sheet export

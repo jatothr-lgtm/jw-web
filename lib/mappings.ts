@@ -5,7 +5,6 @@ export const PLANTS = [
   "Indore",
   "Purnia",
   "Kundli",
-  "Udupi",
   "UD",
   "Rebela",
 ] as const;
@@ -19,7 +18,6 @@ export const PLANT_TO_MFG_TYPE: Record<Plant, MfgType> = {
   Indore: "In House",
   Purnia: "In House",
   Kundli: "In House",
-  Udupi: "In House",
   UD: "3P",
   Rebela: "3P",
 };

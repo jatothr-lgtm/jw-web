@@ -10,8 +10,8 @@ Data lives in Supabase and is pushed to a Google Sheet.
 
 | Field | Behaviour |
 |---|---|
-| Plant | Select one of Indore, Purnia, Kundli, Udupi, UD, Rebela |
-| MFG Type | **Auto-filled** from plant (Indore/Purnia/Kundli/Udupi → In House; UD/Rebela → 3P) |
+| Plant | Select one of Indore, Purnia, Kundli, UD, Rebela |
+| MFG Type | **Auto-filled** from plant (Indore/Purnia/Kundli → In House; UD/Rebela → 3P) |
 | Month | Month picker, displayed as `MMM-YY` |
 | No. of working days | Manual, numeric only |
 | Production (kgs) | Manual, numeric only |
@@ -42,8 +42,9 @@ disagrees with the formula.
 | RPC UD Foods Finished Goods - CBSPL | UD |
 | RPC Functional & Innovative Foods Finished Goods - CBSPL | Rebela |
 
-Udupi has no warehouse in the mapping, so its revenue stays blank until a
-warehouse is assigned in [`lib/mappings.ts`](lib/mappings.ts) and `supabase/schema.sql`.
+Every plant maps to exactly one warehouse. Udupi appears in the original
+spreadsheet but the plant no longer exists, so it is deliberately absent
+everywhere — plant list, warehouse mapping, schema and seed data.
 
 ## Workflow
 
