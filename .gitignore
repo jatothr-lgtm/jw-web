@@ -9,3 +9,6 @@ build/
 next-env.d.ts
 .DS_Store
 .claude/
+
+# Historical seed data contains real financials; keep it out of the public repo.
+supabase/seed.sql
