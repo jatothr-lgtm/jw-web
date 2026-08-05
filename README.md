@@ -65,6 +65,10 @@ warehouse is assigned in [`lib/mappings.ts`](lib/mappings.ts) and `supabase/sche
 Create a project at [supabase.com](https://supabase.com), then:
 
 - **SQL Editor → New query** → paste [`supabase/schema.sql`](supabase/schema.sql) → Run.
+- Optionally run [`supabase/seed.sql`](supabase/seed.sql) to load the Jan–Jun history
+  from the original Excel. The sheet carries no year, so the script assumes **2026** —
+  change `seed_year` at the top if that is wrong. Re-running it is safe; every row
+  upserts on `(plant, month)`.
 - **Project Settings → API** → copy the Project URL and the `anon` public key.
 - **Authentication → Providers → Email** → enable. For an internal tool you will
   probably want to switch **Confirm email** off so registration is immediate.
