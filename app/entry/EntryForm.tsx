@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { derive, formatNumber, formatPercent, parseNumeric } from "@/lib/calc";
-import { mfgTypeForPlant, PLANTS } from "@/lib/mappings";
+import { mfgTypeForPlant } from "@/lib/mappings";
 import { isoToMonthInput, monthInputToIso, toMonthLabel } from "@/lib/month";
 
 /** The seven manually-entered numeric fields (requirements #5-#11). */
@@ -40,10 +40,11 @@ function sanitiseNumericInput(raw: string): string {
   return negative ? `-${joined}` : joined;
 }
 
-export default function EntryForm() {
+export default function EntryForm({ allowedPlants }: { allowedPlants: string[] }) {
   const supabase = useMemo(() => createClient(), []);
 
-  const [plant, setPlant] = useState("");
+  // With a single grant there is nothing to choose, so preselect it.
+  const [plant, setPlant] = useState(allowedPlants.length === 1 ? allowedPlants[0] : "");
   const [monthInput, setMonthInput] = useState("");
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
 
@@ -173,6 +174,18 @@ export default function EntryForm() {
     setSaving(false);
   }
 
+  if (allowedPlants.length === 0) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-2xl font-bold">Monthly entry</h1>
+        <div className="card text-slate-600">
+          You have not been granted access to any plant yet. Ask an administrator to
+          assign one to you on the Access page.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={onSave} className="space-y-6">
       <div>
@@ -195,7 +208,7 @@ export default function EntryForm() {
             required
           >
             <option value="">Select a plant…</option>
-            {PLANTS.map((name) => (
+            {allowedPlants.map((name) => (
               <option key={name} value={name}>{name}</option>
             ))}
           </select>

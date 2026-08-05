@@ -8,7 +8,7 @@ import { toMonthLabel } from "@/lib/month";
 import { aggregateRevenue, type RevenueParseResult } from "@/lib/revenue";
 import { WAREHOUSE_TO_PLANT } from "@/lib/mappings";
 
-export default function RevenueImport() {
+export default function RevenueImport({ allowedPlants }: { allowedPlants: string[] }) {
   const supabase = useMemo(() => createClient(), []);
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -45,8 +45,21 @@ export default function RevenueImport() {
     }
   }
 
+  // A user may only write revenue for plants they have been granted; the same
+  // rule is enforced by RLS, this just avoids a confusing partial failure.
+  const savableRows = (result?.rows ?? []).filter((row) =>
+    allowedPlants.includes(row.plant),
+  );
+  const blockedPlants = [
+    ...new Set(
+      (result?.rows ?? [])
+        .filter((row) => !allowedPlants.includes(row.plant))
+        .map((row) => row.plant),
+    ),
+  ];
+
   async function onSave() {
-    if (!result || result.rows.length === 0) return;
+    if (savableRows.length === 0) return;
 
     setSaving(true);
     setMessage(null);
@@ -54,7 +67,7 @@ export default function RevenueImport() {
     const { data: userData } = await supabase.auth.getUser();
 
     const { error } = await supabase.from("revenue").upsert(
-      result.rows.map((row) => ({
+      savableRows.map((row) => ({
         plant: row.plant,
         month: row.monthIso,
         revenue: row.revenue,
@@ -72,7 +85,7 @@ export default function RevenueImport() {
 
     setMessage({
       kind: "ok",
-      text: `Stored ${result.rows.length} plant-month revenue total${result.rows.length === 1 ? "" : "s"}.`,
+      text: `Stored ${savableRows.length} plant-month revenue total${savableRows.length === 1 ? "" : "s"}.`,
     });
     setSaving(false);
   }
@@ -146,6 +159,14 @@ export default function RevenueImport() {
             </details>
           )}
 
+          {blockedPlants.length > 0 && (
+            <p className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              The file also contains revenue for{" "}
+              <strong>{blockedPlants.join(", ")}</strong>, which you do not have access
+              to. Those totals are shown below but will not be saved.
+            </p>
+          )}
+
           <div className="overflow-x-auto">
             <table className="w-full min-w-[420px] text-sm">
               <thead>
@@ -156,13 +177,23 @@ export default function RevenueImport() {
                 </tr>
               </thead>
               <tbody>
-                {result.rows.map((row) => (
-                  <tr key={`${row.plant}-${row.monthIso}`} className="border-b border-slate-100">
-                    <td className="py-2 pr-4">{toMonthLabel(row.monthIso)}</td>
-                    <td className="py-2 pr-4">{row.plant}</td>
-                    <td className="py-2 text-right tabular-nums">{formatNumber(row.revenue)}</td>
-                  </tr>
-                ))}
+                {result.rows.map((row) => {
+                  const blocked = !allowedPlants.includes(row.plant);
+                  return (
+                    <tr
+                      key={`${row.plant}-${row.monthIso}`}
+                      className={
+                        blocked
+                          ? "border-b border-slate-100 text-slate-400 line-through"
+                          : "border-b border-slate-100"
+                      }
+                    >
+                      <td className="py-2 pr-4">{toMonthLabel(row.monthIso)}</td>
+                      <td className="py-2 pr-4">{row.plant}</td>
+                      <td className="py-2 text-right tabular-nums">{formatNumber(row.revenue)}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -183,9 +214,9 @@ export default function RevenueImport() {
             <button
               className="btn-primary"
               onClick={onSave}
-              disabled={saving || result.rows.length === 0}
+              disabled={saving || savableRows.length === 0}
             >
-              {saving ? "Saving…" : "Save to database"}
+              {saving ? "Saving…" : `Save ${savableRows.length} total${savableRows.length === 1 ? "" : "s"} to database`}
             </button>
             <button className="btn-ghost" onClick={reset} disabled={saving}>
               Discard

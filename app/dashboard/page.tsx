@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import AppShell from "@/components/AppShell";
 import SyncAllButton from "./SyncAllButton";
+import { requireSession } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { formatNumber, formatPercent } from "@/lib/calc";
 import { toMonthLabel } from "@/lib/month";
@@ -31,13 +31,10 @@ function num(value: string | null): number | null {
 }
 
 export default async function DashboardPage() {
+  const { profile, isAdmin } = await requireSession();
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
-  if (!user) redirect("/login");
-
+  // RLS already restricts these rows to the user's granted plants.
   const { data, error } = await supabase
     .from("entries")
     .select(
@@ -49,13 +46,17 @@ export default async function DashboardPage() {
   const rows = (data ?? []) as EntryRow[];
 
   return (
-    <AppShell email={user.email ?? ""}>
+    <AppShell email={profile.email} isAdmin={isAdmin}>
       <div className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold">Dashboard</h1>
             <p className="mt-1 text-sm text-slate-500">
-              All saved monthly entries across plants.
+              {isAdmin
+                ? "All saved monthly entries across every plant."
+                : profile.allowed_plants.length > 0
+                  ? `Saved monthly entries for ${profile.allowed_plants.join(", ")}.`
+                  : "You have not been granted access to any plant yet."}
             </p>
           </div>
           <div className="flex gap-3">
@@ -73,8 +74,16 @@ export default async function DashboardPage() {
 
         {!error && rows.length === 0 && (
           <div className="card text-center">
-            <p className="text-slate-600">No entries yet.</p>
-            <Link href="/entry" className="btn-primary mt-4">Create the first entry</Link>
+            {!isAdmin && profile.allowed_plants.length === 0 ? (
+              <p className="text-slate-600">
+                Ask an administrator to grant you a plant on the Access page.
+              </p>
+            ) : (
+              <>
+                <p className="text-slate-600">No entries yet.</p>
+                <Link href="/entry" className="btn-primary mt-4">Create the first entry</Link>
+              </>
+            )}
           </div>
         )}
 

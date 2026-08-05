@@ -46,6 +46,30 @@ Every plant maps to exactly one warehouse. Udupi appears in the original
 spreadsheet but the plant no longer exists, so it is deliberately absent
 everywhere — plant list, warehouse mapping, schema and seed data.
 
+## Access control
+
+Two roles, enforced in Postgres row-level security rather than only in the UI, so
+the rules hold even against a hand-crafted API call.
+
+| Role | Can do |
+|---|---|
+| **admin** | See and edit every plant; manage everyone's access on the **Access** tab |
+| **user** | See and edit only the plants granted to them; no Access tab |
+
+`jatoth.r@farmley.com` is the bootstrap admin — the account is promoted
+automatically whether it registers before or after the schema is installed.
+Everyone else registers as a user with **no plants**, and therefore sees nothing
+until an admin grants them a plant.
+
+The **Access** tab lists every registered user, with a role selector and a plant
+checkbox per user. Two safeguards: you cannot change your own role, and the last
+remaining admin cannot be demoted or deleted (enforced by a database trigger, not
+just the UI).
+
+Plant scoping applies to reads as well as writes — a Kundli manager cannot see
+Indore's numbers on the dashboard, and a revenue import file containing other
+plants will save only the rows they are entitled to.
+
 ## Workflow
 
 1. **Register / sign in** — Supabase email + password auth.
@@ -115,24 +139,20 @@ npm run dev
 
 Not built, in rough order of value:
 
-1. **Role-based access.** Right now any signed-in user can read and write every
-   plant. A `profiles` table holding `role` and `allowed_plants`, enforced in the
-   RLS policies, would restrict plant managers to their own plant and leave
-   finance with the full view.
-2. **Approval / lock workflow.** A `status` column (`draft` → `submitted` →
+1. **Approval / lock workflow.** A `status` column (`draft` → `submitted` →
    `approved`) with a policy that blocks edits to approved months, so closed
    periods cannot be quietly changed.
-3. **Audit trail.** An `entries_history` table written by a trigger, capturing who
+2. **Audit trail.** An `entries_history` table written by a trigger, capturing who
    changed which field and when — useful when a JW% moves after month-end.
-4. **Variance alerts.** Flag on save when JW/kg or JW% of revenue deviates more
+3. **Variance alerts.** Flag on save when JW/kg or JW% of revenue deviates more
    than *n*% from the plant's trailing 3-month average. This catches a mistyped
    digit at entry time rather than at review time.
-5. **Budget vs actual.** The source sheet also carries `BOM JW Per Kg` and
+4. **Budget vs actual.** The source sheet also carries `BOM JW Per Kg` and
    `JW Amt/Kgs`; storing those as a budget and showing actual-vs-budget variance
    per plant-month would make the dashboard decision-useful.
-6. **Charts.** Month-on-month JW/kg and PPP trend lines per plant.
-7. **Excel / CSV export** of the dashboard, for people who want the pivot offline.
-8. **Scheduled revenue refresh.** If the sales data can be reached by API, a daily
+5. **Charts.** Month-on-month JW/kg and PPP trend lines per plant.
+6. **Excel / CSV export** of the dashboard, for people who want the pivot offline.
+7. **Scheduled revenue refresh.** If the sales data can be reached by API, a daily
    Vercel cron could refresh `revenue` instead of relying on a manual upload.
-9. **Completeness view.** A plant × month grid showing which cells are still
+8. **Completeness view.** A plant × month grid showing which cells are still
    missing, so nothing is forgotten at month-end close.

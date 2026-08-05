@@ -1,21 +1,20 @@
-import { redirect } from "next/navigation";
 import AppShell from "@/components/AppShell";
 import RevenueImport from "./RevenueImport";
-import { createClient } from "@/lib/supabase/server";
+import { requireSession } from "@/lib/auth";
+import { PLANTS } from "@/lib/mappings";
 
 export const dynamic = "force-dynamic";
 
 export default async function RevenuePage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { profile, isAdmin } = await requireSession();
 
-  if (!user) redirect("/login");
+  const allowedPlants = isAdmin
+    ? [...PLANTS]
+    : PLANTS.filter((plant) => profile.allowed_plants.includes(plant));
 
   return (
-    <AppShell email={user.email ?? ""}>
-      <RevenueImport />
+    <AppShell email={profile.email} isAdmin={isAdmin}>
+      <RevenueImport allowedPlants={allowedPlants} />
     </AppShell>
   );
 }

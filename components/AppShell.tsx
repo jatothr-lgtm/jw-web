@@ -5,16 +5,19 @@ import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 const NAV = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/entry", label: "Monthly entry" },
-  { href: "/revenue", label: "Revenue import" },
+  { href: "/dashboard", label: "Dashboard", adminOnly: false },
+  { href: "/entry", label: "Monthly entry", adminOnly: false },
+  { href: "/revenue", label: "Revenue import", adminOnly: false },
+  { href: "/admin", label: "Access", adminOnly: true },
 ];
 
 export default function AppShell({
   email,
+  isAdmin = false,
   children,
 }: {
   email: string;
+  isAdmin?: boolean;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -35,7 +38,7 @@ export default function AppShell({
           </Link>
 
           <nav className="flex gap-1">
-            {NAV.map((item) => (
+            {NAV.filter((item) => isAdmin || !item.adminOnly).map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -51,7 +54,14 @@ export default function AppShell({
           </nav>
 
           <div className="ml-auto flex items-center gap-3">
-            <span className="hidden text-sm text-slate-500 sm:inline">{email}</span>
+            <span className="hidden text-sm text-slate-500 sm:inline">
+              {email}
+              {isAdmin && (
+                <span className="ml-2 rounded bg-brand-50 px-2 py-0.5 text-xs font-semibold text-brand-700">
+                  admin
+                </span>
+              )}
+            </span>
             <button onClick={signOut} className="btn-ghost">Sign out</button>
           </div>
         </div>
