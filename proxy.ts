@@ -2,7 +2,15 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isSupabaseConfigured, SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/env";
 
-const PUBLIC_PATHS = ["/login", "/register", "/auth"];
+const PUBLIC_PATHS = [
+  "/login",
+  "/register",
+  "/auth",
+  "/forgot-password",
+  // Reached with a recovery session that is not yet a full sign-in, so it must
+  // not be bounced to /login.
+  "/reset-password",
+];
 
 type CookieToSet = { name: string; value: string; options?: CookieOptions };
 
