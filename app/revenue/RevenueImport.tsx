@@ -119,7 +119,7 @@ export default function RevenueImport({ allowedPlants }: { allowedPlants: string
         />
         <p className="text-xs text-slate-500">
           The file is read in your browser — only the monthly totals are sent to the
-          database.
+          database. Rows that are identical in every column are counted once.
         </p>
         {parsing && <p className="text-sm text-slate-500">Reading file…</p>}
       </section>
@@ -136,6 +136,7 @@ export default function RevenueImport({ allowedPlants }: { allowedPlants: string
         <section className="card space-y-4">
           <div className="flex flex-wrap gap-6 text-sm text-slate-600">
             <span><strong>{result.totalRowsRead}</strong> rows read</span>
+            <span><strong>{result.duplicateRowsRemoved}</strong> exact duplicates removed</span>
             <span><strong>{result.rows.length}</strong> plant-month totals</span>
             <span><strong>{result.skippedUnmappedWarehouse}</strong> skipped (warehouse not mapped)</span>
             <span><strong>{result.skippedBadDate}</strong> skipped (unreadable invoice date)</span>

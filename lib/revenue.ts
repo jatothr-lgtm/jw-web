@@ -13,6 +13,7 @@ export type RevenueRow = {
 export type RevenueParseResult = {
   rows: RevenueRow[];
   totalRowsRead: number;
+  duplicateRowsRemoved: number;
   skippedUnmappedWarehouse: number;
   skippedBadDate: number;
   unmappedWarehouseNames: string[];
@@ -42,6 +43,37 @@ function resolveColumn(headers: string[], aliases: string[]): string | null {
   return null;
 }
 
+/**
+ * A stable fingerprint of an entire row, used to spot exact duplicates.
+ *
+ * Every column counts, not just the three we aggregate on — two rows are only
+ * duplicates if they agree on all of them. Text is trimmed, case-folded and has
+ * runs of whitespace collapsed, so "  RPC  Indore " and "rpc indore" match.
+ *
+ * Values of different types do not unify: a date held as a Date does not match
+ * the same date held as a string. Within one export a column has one type, so
+ * this only matters across files — and re-importing a file cannot double-count
+ * anyway, because revenue upserts on (plant, month) rather than adding.
+ *
+ * JSON.stringify over an array keeps the column boundaries unambiguous, so two
+ * different splits of the same characters can never collide.
+ */
+function rowFingerprint(row: Record<string, unknown>, headers: string[]): string {
+  return JSON.stringify(
+    headers.map((header) => {
+      const value = row[header];
+      if (value === null || value === undefined) return "";
+      if (value instanceof Date) {
+        return Number.isNaN(value.getTime()) ? "" : value.toISOString();
+      }
+      if (typeof value === "number") {
+        return Number.isFinite(value) ? String(value) : "";
+      }
+      return String(value).replace(/\s+/g, " ").trim().toLowerCase();
+    }),
+  );
+}
+
 function parseAmount(value: unknown): number | null {
   if (typeof value === "number") return Number.isFinite(value) ? value : null;
   if (typeof value !== "string") return null;
@@ -62,6 +94,7 @@ export function aggregateRevenue(
   const result: RevenueParseResult = {
     rows: [],
     totalRowsRead: sheetRows.length,
+    duplicateRowsRemoved: 0,
     skippedUnmappedWarehouse: 0,
     skippedBadDate: 0,
     unmappedWarehouseNames: [],
@@ -85,8 +118,18 @@ export function aggregateRevenue(
 
   const totals = new Map<string, RevenueRow>();
   const unmapped = new Set<string>();
+  // Rows identical across every column are the same invoice exported twice.
+  // The first occurrence counts; later ones are dropped before aggregation.
+  const seenRows = new Set<string>();
 
   for (const row of sheetRows) {
+    const fingerprint = rowFingerprint(row, headers);
+    if (seenRows.has(fingerprint)) {
+      result.duplicateRowsRemoved += 1;
+      continue;
+    }
+    seenRows.add(fingerprint);
+
     const plant = plantForWarehouse(row[warehouseCol]);
     if (!plant) {
       const name = String(row[warehouseCol] ?? "").trim();
