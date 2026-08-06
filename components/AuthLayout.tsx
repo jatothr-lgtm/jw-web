@@ -1,3 +1,4 @@
+import BrandBar from "@/components/BrandBar";
 import Logo from "@/components/Logo";
 
 const HIGHLIGHTS = [
@@ -22,7 +23,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         />
 
         <div className="relative flex h-full flex-col">
-          <Logo className="h-11 w-auto" tone="light" />
+          <Logo className="h-12" tone="light" />
 
           <div className="mt-10 lg:mt-auto lg:pb-6">
             <h2 className="text-3xl font-bold leading-tight tracking-tight text-white lg:text-4xl">
@@ -53,7 +54,14 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               ))}
             </ul>
 
-            <p className="mt-10 hidden text-xs text-navy-300 lg:block">
+            <div className="mt-10">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-navy-300">
+                Our brands
+              </p>
+              <BrandBar onDark size="sm" />
+            </div>
+
+            <p className="mt-8 hidden text-xs text-navy-300 lg:block">
               Indore · Purnia · Kundli · UD · Rebela
             </p>
           </div>
