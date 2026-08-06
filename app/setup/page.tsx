@@ -13,7 +13,7 @@ export default function SetupPage() {
       <div className="card w-full max-w-xl space-y-4">
         <h1 className="text-xl font-bold">Not configured yet</h1>
 
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-navy-600">
           The app cannot reach Supabase because{" "}
           {missing.length === 1 ? "this environment variable is" : "these environment variables are"}{" "}
           missing:
@@ -21,14 +21,14 @@ export default function SetupPage() {
 
         <ul className="space-y-1">
           {missing.map((name) => (
-            <li key={name} className="rounded bg-slate-100 px-3 py-2 font-mono text-sm">
+            <li key={name} className="rounded bg-navy-100 px-3 py-2 font-mono text-sm">
               {name}
             </li>
           ))}
         </ul>
 
-        <div className="space-y-2 text-sm text-slate-600">
-          <p className="font-semibold text-slate-800">To fix on Vercel</p>
+        <div className="space-y-2 text-sm text-navy-600">
+          <p className="font-semibold text-navy-800">To fix on Vercel</p>
           <ol className="list-inside list-decimal space-y-1">
             <li>Project → Settings → Environment Variables → add the names above.</li>
             <li>Tick all three environments (Production, Preview, Development).</li>
@@ -39,7 +39,7 @@ export default function SetupPage() {
           </ol>
         </div>
 
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-navy-500">
           Values come from Supabase → Project Settings → API: the Project URL and the
           publishable (anon) key.
         </p>

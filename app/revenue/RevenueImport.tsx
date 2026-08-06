@@ -101,7 +101,7 @@ export default function RevenueImport({ allowedPlants }: { allowedPlants: string
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Revenue import</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-navy-500">
           Upload the sales export. Rows are grouped by month of Invoice Date and by
           the plant that owns the From Warehouse, then Taxable Sale Amount is summed.
         </p>
@@ -117,15 +117,15 @@ export default function RevenueImport({ allowedPlants }: { allowedPlants: string
           className="input"
           onChange={onFile}
         />
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-navy-500">
           The file is read in your browser — only the monthly totals are sent to the
           database. Rows that are identical in every column are counted once.
         </p>
-        {parsing && <p className="text-sm text-slate-500">Reading file…</p>}
+        {parsing && <p className="text-sm text-navy-500">Reading file…</p>}
       </section>
 
       {result && result.missingColumns.length > 0 && (
-        <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p className="note-error">
           Missing required column{result.missingColumns.length > 1 ? "s" : ""}:{" "}
           <strong>{result.missingColumns.join(", ")}</strong>. Check that the first
           sheet has a header row.
@@ -134,7 +134,7 @@ export default function RevenueImport({ allowedPlants }: { allowedPlants: string
 
       {result && result.missingColumns.length === 0 && (
         <section className="card space-y-4">
-          <div className="flex flex-wrap gap-6 text-sm text-slate-600">
+          <div className="flex flex-wrap gap-6 text-sm text-navy-600">
             <span><strong>{result.totalRowsRead}</strong> rows read</span>
             <span><strong>{result.duplicateRowsRemoved}</strong> exact duplicates removed</span>
             <span><strong>{result.rows.length}</strong> plant-month totals</span>
@@ -143,7 +143,7 @@ export default function RevenueImport({ allowedPlants }: { allowedPlants: string
           </div>
 
           {result.unmappedWarehouseNames.length > 0 && (
-            <details className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <details className="note-warn">
               <summary className="cursor-pointer font-semibold">
                 {result.unmappedWarehouseNames.length} warehouse name
                 {result.unmappedWarehouseNames.length === 1 ? "" : "s"} not in the mapping
@@ -161,7 +161,7 @@ export default function RevenueImport({ allowedPlants }: { allowedPlants: string
           )}
 
           {blockedPlants.length > 0 && (
-            <p className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <p className="note-warn">
               The file also contains revenue for{" "}
               <strong>{blockedPlants.join(", ")}</strong>, which you do not have access
               to. Those totals are shown below but will not be saved.
@@ -171,7 +171,7 @@ export default function RevenueImport({ allowedPlants }: { allowedPlants: string
           <div className="overflow-x-auto">
             <table className="w-full min-w-[420px] text-sm">
               <thead>
-                <tr className="border-b border-slate-200 text-left text-slate-500">
+                <tr className="border-b border-navy-100 text-left text-navy-500">
                   <th className="py-2 pr-4 font-medium">Month</th>
                   <th className="py-2 pr-4 font-medium">Plant</th>
                   <th className="py-2 text-right font-medium">Revenue</th>
@@ -185,8 +185,8 @@ export default function RevenueImport({ allowedPlants }: { allowedPlants: string
                       key={`${row.plant}-${row.monthIso}`}
                       className={
                         blocked
-                          ? "border-b border-slate-100 text-slate-400 line-through"
-                          : "border-b border-slate-100"
+                          ? "border-b border-navy-50 text-navy-400 line-through"
+                          : "border-b border-navy-50"
                       }
                     >
                       <td className="py-2 pr-4">{toMonthLabel(row.monthIso)}</td>
@@ -203,8 +203,8 @@ export default function RevenueImport({ allowedPlants }: { allowedPlants: string
             <p
               className={
                 message.kind === "ok"
-                  ? "rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-700"
-                  : "rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
+                  ? "note-ok"
+                  : "note-error"
               }
             >
               {message.text}
@@ -223,7 +223,7 @@ export default function RevenueImport({ allowedPlants }: { allowedPlants: string
               Discard
             </button>
           </div>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-navy-500">
             Saving overwrites any existing total for the same plant and month.
           </p>
         </section>

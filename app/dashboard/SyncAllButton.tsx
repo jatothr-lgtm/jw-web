@@ -29,7 +29,7 @@ export default function SyncAllButton() {
 
   return (
     <div className="flex items-center gap-3">
-      {note && <span className="text-sm text-slate-500">{note}</span>}
+      {note && <span className="text-sm text-navy-500">{note}</span>}
       <button className="btn-ghost" onClick={syncAll} disabled={busy}>
         {busy ? "Syncing…" : "Sync to Google Sheet"}
       </button>

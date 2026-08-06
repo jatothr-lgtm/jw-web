@@ -3,41 +3,125 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
   body {
-    @apply bg-slate-50 text-slate-900 antialiased;
+    @apply bg-cream-100 text-navy-900 antialiased;
+    background-image:
+      radial-gradient(60rem 40rem at 90% -10%, rgba(227, 165, 60, 0.07), transparent 60%),
+      radial-gradient(50rem 36rem at -10% 0%, rgba(42, 70, 119, 0.06), transparent 60%);
+    background-attachment: fixed;
+  }
+
+  /* Numeric columns line up only if the digits are the same width. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    @apply bg-amber-200 text-navy-900;
   }
 }
 
 @layer components {
+  /* ---- Surfaces ---------------------------------------------------- */
   .card {
-    @apply rounded-xl border border-slate-200 bg-white p-6 shadow-sm;
+    @apply rounded-2xl border border-navy-100 bg-white p-6 shadow-card;
   }
 
+  .card-flush {
+    @apply overflow-hidden rounded-2xl border border-navy-100 bg-white shadow-card;
+  }
+
+  .section-title {
+    @apply text-sm font-semibold uppercase tracking-wider text-navy-400;
+  }
+
+  /* ---- Forms -------------------------------------------------------- */
   .label {
-    @apply mb-1 block text-sm font-medium text-slate-700;
+    @apply mb-1.5 block text-sm font-medium text-navy-700;
   }
 
   .input {
-    @apply w-full rounded-lg border border-slate-300 px-3 py-2 text-sm
-           outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100
-           disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500;
+    @apply w-full rounded-xl border border-navy-200 bg-white px-3.5 py-2.5 text-sm
+           text-navy-900 shadow-sm outline-none transition
+           placeholder:text-navy-300
+           focus:border-navy-500 focus:ring-4 focus:ring-navy-500/10
+           disabled:cursor-not-allowed disabled:border-navy-100
+           disabled:bg-navy-50 disabled:text-navy-400;
   }
 
+  select.input {
+    @apply cursor-pointer appearance-none bg-[length:1.1rem] bg-[right_0.75rem_center] bg-no-repeat pr-10;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2393aacf'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E");
+  }
+
+  /* ---- Buttons ------------------------------------------------------ */
   .btn {
-    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm
-           font-semibold transition disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5
+           text-sm font-semibold transition active:scale-[0.98]
+           disabled:pointer-events-none disabled:opacity-50;
   }
 
   .btn-primary {
-    @apply btn bg-brand-600 text-white hover:bg-brand-700;
+    @apply btn bg-navy-800 text-white shadow-sm
+           hover:bg-navy-700 focus-visible:ring-4 focus-visible:ring-navy-500/25;
+  }
+
+  .btn-accent {
+    @apply btn bg-amber-400 text-navy-900 shadow-sm
+           hover:bg-amber-300 focus-visible:ring-4 focus-visible:ring-amber-400/30;
   }
 
   .btn-ghost {
-    @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50;
+    @apply btn border border-navy-200 bg-white text-navy-700
+           hover:border-navy-300 hover:bg-navy-50;
+  }
+
+  /* ---- Data display ------------------------------------------------- */
+  .stat {
+    @apply rounded-2xl border border-navy-100 bg-white p-5 shadow-card;
+  }
+
+  .stat-label {
+    @apply text-xs font-semibold uppercase tracking-wider text-navy-400;
+  }
+
+  .stat-value {
+    @apply mt-1.5 text-2xl font-bold tracking-tight text-navy-900 tabular;
   }
 
   .derived {
-    @apply rounded-lg border border-brand-100 bg-brand-50 px-3 py-2 text-sm
-           font-semibold text-brand-700;
+    @apply rounded-xl border border-navy-100 bg-gradient-to-br from-navy-50 to-white
+           px-3.5 py-3 text-lg font-bold text-navy-800 tabular;
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+
+  .badge-navy  { @apply badge bg-navy-100 text-navy-700; }
+  .badge-amber { @apply badge bg-amber-100 text-amber-800; }
+
+  /* ---- Feedback ----------------------------------------------------- */
+  .note {
+    @apply rounded-xl px-4 py-3 text-sm;
+  }
+
+  .note-ok    { @apply note bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100; }
+  .note-warn  { @apply note bg-amber-50 text-amber-900 ring-1 ring-amber-100; }
+  .note-error { @apply note bg-rose-50 text-rose-800 ring-1 ring-rose-100; }
+  .note-muted { @apply note bg-navy-50 text-navy-600 ring-1 ring-navy-100; }
+
+  /* ---- Tables ------------------------------------------------------- */
+  .th {
+    @apply whitespace-nowrap px-4 py-3.5 text-left text-xs font-semibold
+           uppercase tracking-wider text-navy-500;
+  }
+
+  .td {
+    @apply whitespace-nowrap px-4 py-3.5 text-sm text-navy-700;
   }
 }

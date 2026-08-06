@@ -58,7 +58,7 @@ export default function AccessManager({
 
   if (rows.length === 0) {
     return (
-      <div className="card text-slate-600">
+      <div className="card text-navy-600">
         No users yet. People appear here as soon as they register.
       </div>
     );
@@ -78,12 +78,12 @@ export default function AccessManager({
                 <p className="font-semibold">
                   {row.email}
                   {isSelf && (
-                    <span className="ml-2 rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+                    <span className="ml-2 rounded bg-navy-100 px-2 py-0.5 text-xs font-medium text-navy-600">
                       you
                     </span>
                   )}
                 </p>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-navy-500">
                   {row.role === "admin"
                     ? "Full access to every plant"
                     : row.allowed_plants.length === 0
@@ -93,7 +93,7 @@ export default function AccessManager({
               </div>
 
               <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-slate-700" htmlFor={`role-${row.id}`}>
+                <label className="text-sm font-medium text-navy-700" htmlFor={`role-${row.id}`}>
                   Role
                 </label>
                 <select
@@ -115,7 +115,7 @@ export default function AccessManager({
             </div>
 
             {lockRole && (
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-navy-500">
                 {isSelf
                   ? "You cannot change your own role."
                   : "This is the only admin; promote someone else first."}
@@ -132,13 +132,13 @@ export default function AccessManager({
                       key={plant}
                       className={
                         checked
-                          ? "flex cursor-pointer items-center gap-2 rounded-lg border border-brand-500 bg-brand-50 px-3 py-1.5 text-sm font-medium text-brand-700"
-                          : "flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50"
+                          ? "flex cursor-pointer items-center gap-2 rounded-lg border border-navy-500 bg-navy-50 px-3 py-1.5 text-sm font-medium text-navy-800"
+                          : "flex cursor-pointer items-center gap-2 rounded-lg border border-navy-200 px-3 py-1.5 text-sm text-navy-600 hover:bg-navy-50"
                       }
                     >
                       <input
                         type="checkbox"
-                        className="accent-brand-600"
+                        className="accent-navy-700"
                         checked={checked}
                         disabled={row.role === "admin"}
                         onChange={() => togglePlant(row, plant)}
@@ -149,7 +149,7 @@ export default function AccessManager({
                 })}
               </div>
               {row.role === "admin" && (
-                <p className="mt-2 text-xs text-slate-500">
+                <p className="mt-2 text-xs text-navy-500">
                   Admins are not restricted by this list.
                 </p>
               )}
@@ -167,7 +167,7 @@ export default function AccessManager({
                 <span
                   className={
                     row.note === "Saved"
-                      ? "text-sm text-brand-700"
+                      ? "text-sm text-navy-800"
                       : "text-sm text-red-700"
                   }
                 >

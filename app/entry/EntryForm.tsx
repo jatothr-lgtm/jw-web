@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { derive, formatNumber, formatPercent, parseNumeric } from "@/lib/calc";
 import { mfgTypeForPlant } from "@/lib/mappings";
-import { isoToMonthInput, monthInputToIso, toMonthLabel } from "@/lib/month";
+import { monthInputToIso, toMonthLabel } from "@/lib/month";
 
 /** The seven manually-entered numeric fields (requirements #5-#11). */
 const NUMERIC_FIELDS = [
@@ -176,9 +176,9 @@ export default function EntryForm({ allowedPlants }: { allowedPlants: string[] }
 
   if (allowedPlants.length === 0) {
     return (
-      <div className="space-y-4">
-        <h1 className="text-2xl font-bold">Monthly entry</h1>
-        <div className="card text-slate-600">
+      <div className="space-y-5">
+        <h1 className="text-3xl font-bold tracking-tight text-navy-900">Monthly entry</h1>
+        <div className="card text-navy-600">
           You have not been granted access to any plant yet. Ask an administrator to
           assign one to you on the Access page.
         </div>
@@ -187,100 +187,126 @@ export default function EntryForm({ allowedPlants }: { allowedPlants: string[] }
   }
 
   return (
-    <form onSubmit={onSave} className="space-y-6">
+    <form onSubmit={onSave} className="space-y-7">
       <div>
-        <h1 className="text-2xl font-bold">Monthly entry</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Pick a plant and month, fill the seven cost fields; everything else is
+        <h1 className="text-3xl font-bold tracking-tight text-navy-900">Monthly entry</h1>
+        <p className="mt-1.5 text-sm text-navy-500">
+          Choose a plant and month, fill the seven cost fields — everything else is
           filled in or calculated for you.
         </p>
       </div>
 
-      {/* ---- Selection ---------------------------------------------------- */}
-      <section className="card grid gap-4 sm:grid-cols-3">
-        <div>
-          <label className="label" htmlFor="plant">Plant</label>
-          <select
-            id="plant"
-            className="input"
-            value={plant}
-            onChange={(e) => setPlant(e.target.value)}
-            required
-          >
-            <option value="">Select a plant…</option>
-            {allowedPlants.map((name) => (
-              <option key={name} value={name}>{name}</option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="label" htmlFor="mfg">MFG type (auto)</label>
-          <input
-            id="mfg"
-            className="input"
-            value={mfgType || ""}
-            placeholder="Select a plant first"
-            readOnly
-            disabled
-          />
-        </div>
-
-        <div>
-          <label className="label" htmlFor="month">Month</label>
-          <input
-            id="month"
-            type="month"
-            className="input"
-            value={monthInput}
-            onChange={(e) => setMonthInput(e.target.value)}
-            required
-          />
-          <p className="mt-1 text-xs text-slate-500">
-            {monthIso ? toMonthLabel(monthIso) : "Shown as MMM-YY"}
-          </p>
-        </div>
-      </section>
-
-      {/* ---- Revenue ------------------------------------------------------ */}
+      {/* ---- Step 1: selection ------------------------------------------- */}
       <section className="card">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <div className="mb-5 flex items-center gap-3">
+          <StepBadge n={1} />
+          <h2 className="font-semibold text-navy-900">Plant and month</h2>
+        </div>
+
+        <div className="grid gap-5 sm:grid-cols-3">
           <div>
-            <h2 className="font-semibold">Revenue (auto-fetched)</h2>
-            <p className="text-sm text-slate-500">
-              Sum of Taxable Sale Amount for this plant&apos;s warehouse in this month.
+            <label className="label" htmlFor="plant">Plant</label>
+            <select
+              id="plant"
+              className="input"
+              value={plant}
+              onChange={(e) => setPlant(e.target.value)}
+              required
+            >
+              <option value="">Select a plant…</option>
+              {allowedPlants.map((name) => (
+                <option key={name} value={name}>{name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="label" htmlFor="mfg">
+              MFG type <span className="font-normal text-navy-400">· auto</span>
+            </label>
+            <input
+              id="mfg"
+              className="input"
+              value={mfgType || ""}
+              placeholder="Select a plant first"
+              readOnly
+              disabled
+            />
+          </div>
+
+          <div>
+            <label className="label" htmlFor="month">Month</label>
+            <input
+              id="month"
+              type="month"
+              className="input"
+              value={monthInput}
+              onChange={(e) => setMonthInput(e.target.value)}
+              required
+            />
+            <p className="mt-1.5 text-xs text-navy-400">
+              {monthIso ? toMonthLabel(monthIso) : "Shown as MMM-YY"}
             </p>
           </div>
-          <p className="text-2xl font-bold text-brand-700">{formatNumber(revenue)}</p>
+        </div>
+      </section>
+
+      {/* ---- Step 2: revenue --------------------------------------------- */}
+      <section className="card-flush">
+        <div className="flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-navy-900 to-navy-700 px-6 py-5">
+          <div>
+            <div className="flex items-center gap-3">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-400 text-xs font-bold text-navy-900">
+                2
+              </span>
+              <h2 className="font-semibold text-white">Revenue</h2>
+              <span className="badge bg-white/15 text-amber-200">auto-fetched</span>
+            </div>
+            <p className="mt-2 text-sm text-navy-200">
+              Taxable Sale Amount for this plant&apos;s warehouse, this month.
+            </p>
+          </div>
+          <p className="text-3xl font-bold tracking-tight text-white tabular">
+            {formatNumber(revenue)}
+          </p>
         </div>
 
-        {revenueState === "loading" && (
-          <p className="mt-3 text-sm text-slate-500">Looking up revenue…</p>
-        )}
-        {revenueState === "missing" && (
-          <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
-            No revenue stored for this plant and month yet. Import the sales file on
-            the <strong>Revenue import</strong> page — you can still save the entry now
-            and the revenue will fill in afterwards.
-          </p>
-        )}
-        {loadedExisting && (
-          <p className="mt-3 rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-600">
-            An entry already exists for this plant and month; saving will update it.
-          </p>
+        {(revenueState === "loading" || revenueState === "missing" || loadedExisting) && (
+          <div className="space-y-3 px-6 py-5">
+            {revenueState === "loading" && (
+              <p className="text-sm text-navy-500">Looking up revenue…</p>
+            )}
+            {revenueState === "missing" && (
+              <p className="note-warn">
+                No revenue stored for this plant and month yet. Import the sales file on
+                the <strong>Revenue import</strong> page — you can still save now and it
+                will fill in afterwards.
+              </p>
+            )}
+            {loadedExisting && (
+              <p className="note-muted">
+                An entry already exists for this plant and month; saving will update it.
+              </p>
+            )}
+          </div>
         )}
       </section>
 
-      {/* ---- Manual inputs ------------------------------------------------ */}
+      {/* ---- Step 3: manual inputs --------------------------------------- */}
       <section className="card">
-        <h2 className="mb-4 font-semibold">Cost inputs</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mb-5 flex items-center gap-3">
+          <StepBadge n={3} />
+          <h2 className="font-semibold text-navy-900">Cost inputs</h2>
+          <span className="ml-auto text-xs text-navy-400">numbers only</span>
+        </div>
+
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
           {NUMERIC_FIELDS.map((field) => (
             <div key={field.key}>
               <label className="label" htmlFor={field.key}>{field.label}</label>
               <input
                 id={field.key}
-                className="input"
+                className="input tabular"
                 inputMode="decimal"
                 autoComplete="off"
                 placeholder="0"
@@ -296,40 +322,45 @@ export default function EntryForm({ allowedPlants }: { allowedPlants: string[] }
             </div>
           ))}
         </div>
+
         {!ready && (
-          <p className="mt-3 text-sm text-slate-500">
+          <p className="note-muted mt-5">
             Select a plant and a month to start entering values.
           </p>
         )}
       </section>
 
-      {/* ---- Derived ------------------------------------------------------ */}
+      {/* ---- Calculated --------------------------------------------------- */}
       <section className="card">
-        <h2 className="mb-4 font-semibold">Calculated</h2>
-        <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Derived label="Job work (= monthly expense)" value={formatNumber(derived.jobWork)} />
-          <Derived label="Fixed cost (= rent + electricity)" value={formatNumber(derived.fixedCost)} />
-          <Derived label="Total cost (= fixed + monthly expense)" value={formatNumber(derived.totalCost)} />
-          <Derived label="Actual JW/kg (= total cost ÷ production)" value={formatNumber(derived.actualJwPerKg)} />
-          <Derived label="PPP (= production ÷ man days)" value={formatNumber(derived.ppp)} />
-          <Derived label="JW % of revenue (= job work ÷ revenue)" value={formatPercent(derived.jwPctOfRev)} />
+        <div className="mb-5 flex items-center gap-3">
+          <span
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-navy-100 text-navy-600"
+            aria-hidden
+          >
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+              <path d="M4 10h12M10 4v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </span>
+          <h2 className="font-semibold text-navy-900">Calculated</h2>
+          <span className="ml-auto text-xs text-navy-400">updates as you type</span>
+        </div>
+
+        <dl className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          <Derived label="Job work" hint="= monthly expense" value={formatNumber(derived.jobWork)} />
+          <Derived label="Fixed cost" hint="= rent + electricity" value={formatNumber(derived.fixedCost)} />
+          <Derived label="Total cost" hint="= fixed + monthly expense" value={formatNumber(derived.totalCost)} />
+          <Derived label="Actual JW/kg" hint="= total cost ÷ production" value={formatNumber(derived.actualJwPerKg)} />
+          <Derived label="PPP" hint="= production ÷ man days" value={formatNumber(derived.ppp)} />
+          <Derived label="JW % of revenue" hint="= job work ÷ revenue" value={formatPercent(derived.jwPctOfRev)} />
         </dl>
       </section>
 
       {message && (
-        <p
-          className={
-            message.kind === "ok"
-              ? "rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-700"
-              : "rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
-          }
-        >
-          {message.text}
-        </p>
+        <p className={message.kind === "ok" ? "note-ok" : "note-error"}>{message.text}</p>
       )}
 
-      <div className="flex gap-3">
-        <button type="submit" className="btn-primary" disabled={!ready || saving}>
+      <div className="sticky bottom-4 flex flex-wrap items-center gap-3 rounded-2xl border border-navy-100 bg-white/90 p-4 shadow-lift backdrop-blur">
+        <button type="submit" className="btn-primary px-6" disabled={!ready || saving}>
           {saving ? "Saving…" : loadedExisting ? "Update entry" : "Save entry"}
         </button>
         <button
@@ -340,15 +371,29 @@ export default function EntryForm({ allowedPlants }: { allowedPlants: string[] }
         >
           Clear inputs
         </button>
+        <p className="ml-auto hidden text-xs text-navy-400 sm:block">
+          Saved to Supabase, then pushed to the Google Sheet.
+        </p>
       </div>
     </form>
   );
 }
 
-function Derived({ label, value }: { label: string; value: string }) {
+function StepBadge({ n }: { n: number }) {
+  return (
+    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-navy-800 text-xs font-bold text-white">
+      {n}
+    </span>
+  );
+}
+
+function Derived({ label, hint, value }: { label: string; hint: string; value: string }) {
   return (
     <div>
-      <dt className="mb-1 text-sm font-medium text-slate-700">{label}</dt>
+      <dt className="mb-1.5">
+        <span className="text-sm font-medium text-navy-700">{label}</span>{" "}
+        <span className="text-xs text-navy-400">{hint}</span>
+      </dt>
       <dd className="derived">{value}</dd>
     </div>
   );

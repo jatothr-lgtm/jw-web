@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import AuthLayout from "@/components/AuthLayout";
 import { createClient } from "@/lib/supabase/client";
 
 export default function RegisterPage() {
@@ -30,10 +31,7 @@ export default function RegisterPage() {
 
     setBusy(true);
     const supabase = createClient();
-    const { data, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+    const { data, error: signUpError } = await supabase.auth.signUp({ email, password });
 
     if (signUpError) {
       setError(signUpError.message);
@@ -41,7 +39,6 @@ export default function RegisterPage() {
       return;
     }
 
-    // With email confirmation switched on, signUp returns no session.
     if (data.session) {
       router.push("/dashboard");
       router.refresh();
@@ -53,11 +50,15 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-6">
-      <form onSubmit={onSubmit} className="card w-full max-w-sm space-y-4">
+    <AuthLayout>
+      <form onSubmit={onSubmit} className="space-y-5">
         <div>
-          <h1 className="text-xl font-bold">Create an account</h1>
-          <p className="mt-1 text-sm text-slate-500">JW monthly cost entry</p>
+          <h1 className="text-2xl font-bold tracking-tight text-navy-900">
+            Create your account
+          </h1>
+          <p className="mt-1.5 text-sm text-navy-500">
+            An administrator assigns your plants once you&apos;ve registered.
+          </p>
         </div>
 
         <div>
@@ -67,6 +68,7 @@ export default function RegisterPage() {
             type="email"
             required
             autoComplete="email"
+            placeholder="you@farmley.com"
             className="input"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -80,6 +82,7 @@ export default function RegisterPage() {
             type="password"
             required
             autoComplete="new-password"
+            placeholder="At least 8 characters"
             className="input"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -93,30 +96,27 @@ export default function RegisterPage() {
             type="password"
             required
             autoComplete="new-password"
+            placeholder="Repeat your password"
             className="input"
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
           />
         </div>
 
-        {error && (
-          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
-        )}
-        {notice && (
-          <p className="rounded-lg bg-brand-50 px-3 py-2 text-sm text-brand-700">{notice}</p>
-        )}
+        {error && <p className="note-error">{error}</p>}
+        {notice && <p className="note-ok">{notice}</p>}
 
-        <button type="submit" className="btn-primary w-full" disabled={busy}>
+        <button type="submit" className="btn-primary w-full py-3" disabled={busy}>
           {busy ? "Creating…" : "Create account"}
         </button>
 
-        <p className="text-center text-sm text-slate-500">
+        <p className="text-center text-sm text-navy-500">
           Already registered?{" "}
-          <Link href="/login" className="font-semibold text-brand-600 hover:underline">
+          <Link href="/login" className="font-semibold text-navy-800 hover:underline">
             Sign in
           </Link>
         </p>
       </form>
-    </main>
+    </AuthLayout>
   );
 }
