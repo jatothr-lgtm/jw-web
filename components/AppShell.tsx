@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import BrandBar from "@/components/BrandBar";
 import Logo from "@/components/Logo";
 import { createClient } from "@/lib/supabase/client";
 
@@ -42,7 +41,8 @@ export default function AppShell({
       <header className="sticky top-0 z-30 border-b border-navy-100 bg-white/85 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center gap-6 px-5 py-3 sm:px-8">
           <Link href="/dashboard" className="shrink-0" aria-label="Farmley home">
-            <Logo className="h-10" />
+            <Logo className="hidden h-11 sm:inline-flex" />
+            <Logo className="h-10 sm:hidden" compact />
           </Link>
 
           <span className="hidden h-6 w-px bg-navy-100 lg:block" />
@@ -129,10 +129,9 @@ export default function AppShell({
       </main>
 
       <footer className="mx-auto max-w-7xl px-5 pb-10 sm:px-8">
-        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-navy-100 pt-6">
-          <BrandBar size="sm" />
-          <p className="text-xs text-navy-400">Job work cost tracking</p>
-        </div>
+        <p className="border-t border-navy-100 pt-5 text-xs text-navy-400">
+          Farmley — job work cost tracking
+        </p>
       </footer>
     </div>
   );
