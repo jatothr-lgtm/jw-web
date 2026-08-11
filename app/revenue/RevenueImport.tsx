@@ -119,7 +119,8 @@ export default function RevenueImport({ allowedPlants }: { allowedPlants: string
         />
         <p className="text-xs text-navy-500">
           The file is read in your browser — only the monthly totals are sent to the
-          database. Rows that are identical in every column are counted once.
+          database. Rows identical in every column count once, and rows with no
+          sales order, no delivery note, or an Invoice Status of “return” are excluded.
         </p>
         {parsing && <p className="text-sm text-navy-500">Reading file…</p>}
       </section>
@@ -137,6 +138,9 @@ export default function RevenueImport({ allowedPlants }: { allowedPlants: string
           <div className="flex flex-wrap gap-6 text-sm text-navy-600">
             <span><strong>{result.totalRowsRead}</strong> rows read</span>
             <span><strong>{result.duplicateRowsRemoved}</strong> exact duplicates removed</span>
+            <span><strong>{result.skippedNoSalesOrder}</strong> without a sales order</span>
+            <span><strong>{result.skippedNoDeliveryNote}</strong> without a delivery note</span>
+            <span><strong>{result.skippedReturns}</strong> returns excluded</span>
             <span><strong>{result.rows.length}</strong> plant-month totals</span>
             <span><strong>{result.skippedUnmappedWarehouse}</strong> skipped (warehouse not mapped)</span>
             <span><strong>{result.skippedBadDate}</strong> skipped (unreadable invoice date)</span>
@@ -157,6 +161,32 @@ export default function RevenueImport({ allowedPlants }: { allowedPlants: string
                 These rows were excluded. Only these five warehouses map to a plant:{" "}
                 {Object.values(WAREHOUSE_TO_PLANT).join(", ")}.
               </p>
+            </details>
+          )}
+
+          {result.invoiceStatuses.length > 0 && (
+            <details className="note-muted">
+              <summary className="cursor-pointer font-semibold">
+                Invoice statuses found in this file ({result.invoiceStatuses.length})
+              </summary>
+              <p className="mt-2">
+                Only the exact status <strong>return</strong> is excluded. If any value
+                below is also a return under a different name, tell me and I will add it.
+              </p>
+              <ul className="mt-2 flex flex-wrap gap-2">
+                {result.invoiceStatuses.map((status) => (
+                  <li
+                    key={status}
+                    className={
+                      status.trim().toLowerCase() === "return"
+                        ? "badge-amber"
+                        : "badge-navy"
+                    }
+                  >
+                    {status}
+                  </li>
+                ))}
+              </ul>
             </details>
           )}
 

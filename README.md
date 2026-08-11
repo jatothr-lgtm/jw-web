@@ -75,8 +75,19 @@ plants will save only the rows they are entitled to.
 1. **Register / sign in** — Supabase email + password auth.
 2. **Revenue import** — upload the sales export (`.xlsx`, `.xls`, `.csv`). It is
    parsed in the browser, aggregated to plant-month totals, previewed, and then
-   written to the `revenue` table. Rows whose warehouse is not in the mapping are
-   reported and excluded rather than silently dropped.
+   written to the `revenue` table.
+
+   Rows are excluded when they are an exact duplicate of an earlier row (every
+   column identical), have an empty **Sales Order**, have an empty **Delivery
+   Note**, have an **Invoice Status** of `return`, or sit in a warehouse that is
+   not in the mapping. Every exclusion is counted on screen rather than being
+   dropped silently, and the distinct Invoice Status values found are listed so
+   a return under another name cannot slip through.
+
+   The file must carry all six columns — `From Warehouse`, `Invoice Date`,
+   `Taxable Sale Amount`, `Sales Order`, `Delivery Note`, `Invoice Status`. A
+   missing column is a hard error rather than a skipped filter, since skipping
+   one would silently overstate revenue.
 3. **Monthly entry** — pick plant + month; MFG type and revenue fill in, the seven
    inputs are typed, and the six derived values update live. Saving upserts on
    `(plant, month)` so re-entering a month edits it instead of duplicating it.
