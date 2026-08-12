@@ -235,6 +235,61 @@ create trigger profiles_touch_updated_at
   for each row execute function public.touch_updated_at();
 
 -- ---------------------------------------------------------------------------
+-- Keep entries.revenue in step with the revenue table
+--
+-- entries.revenue is a snapshot, and jw_pct_of_rev is generated from it. Without
+-- this, importing a sales file after an entry was saved would leave that entry
+-- on its old revenue and its JW % of revenue blank for ever.
+-- ---------------------------------------------------------------------------
+create or replace function public.sync_entry_revenue()
+returns trigger
+language plpgsql
+as $$
+begin
+  update public.entries e
+     set revenue = new.revenue
+   where e.plant = new.plant
+     and e.month = new.month
+     and e.revenue is distinct from new.revenue;
+  return new;
+end;
+$$;
+
+drop trigger if exists revenue_sync_entries on public.revenue;
+create trigger revenue_sync_entries
+  after insert or update on public.revenue
+  for each row execute function public.sync_entry_revenue();
+
+-- The other direction: an entry saved for a month whose revenue was imported
+-- earlier picks that figure up automatically.
+create or replace function public.fill_entry_revenue()
+returns trigger
+language plpgsql
+as $$
+begin
+  if new.revenue is null then
+    select r.revenue into new.revenue
+      from public.revenue r
+     where r.plant = new.plant and r.month = new.month;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists entries_fill_revenue on public.entries;
+create trigger entries_fill_revenue
+  before insert or update on public.entries
+  for each row execute function public.fill_entry_revenue();
+
+-- Backfill anything saved before these triggers existed.
+update public.entries e
+   set revenue = r.revenue
+  from public.revenue r
+ where e.plant = r.plant
+   and e.month = r.month
+   and e.revenue is distinct from r.revenue;
+
+-- ---------------------------------------------------------------------------
 -- Row Level Security
 --
 -- Admins see and edit everything. Everyone else is confined to the plants in
@@ -269,21 +324,50 @@ create policy "profiles deletable by admin"
   using (public.is_admin());
 
 -- Revenue and entries: scoped to the plants the user has been granted.
+-- Revenue: readable for granted plants so the entry form can show the figure,
+-- but only an admin imports or changes it.
 drop policy if exists "revenue readable by authenticated" on public.revenue;
 drop policy if exists "revenue writable by authenticated" on public.revenue;
 drop policy if exists "revenue scoped to granted plants" on public.revenue;
-create policy "revenue scoped to granted plants"
-  on public.revenue for all to authenticated
-  using (public.can_access_plant(plant))
-  with check (public.can_access_plant(plant));
 
+drop policy if exists "revenue readable within granted plants" on public.revenue;
+create policy "revenue readable within granted plants"
+  on public.revenue for select to authenticated
+  using (public.can_access_plant(plant));
+
+drop policy if exists "revenue writable by admin" on public.revenue;
+create policy "revenue writable by admin"
+  on public.revenue for all to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
+
+-- Entries: read and write are scoped to granted plants, but deletion is an
+-- admin-only power so a data-entry mistake cannot be quietly erased by the
+-- person who made it.
 drop policy if exists "entries readable by authenticated" on public.entries;
 drop policy if exists "entries writable by authenticated" on public.entries;
 drop policy if exists "entries scoped to granted plants" on public.entries;
-create policy "entries scoped to granted plants"
-  on public.entries for all to authenticated
+
+drop policy if exists "entries readable within granted plants" on public.entries;
+create policy "entries readable within granted plants"
+  on public.entries for select to authenticated
+  using (public.can_access_plant(plant));
+
+drop policy if exists "entries insertable within granted plants" on public.entries;
+create policy "entries insertable within granted plants"
+  on public.entries for insert to authenticated
+  with check (public.can_access_plant(plant));
+
+drop policy if exists "entries updatable within granted plants" on public.entries;
+create policy "entries updatable within granted plants"
+  on public.entries for update to authenticated
   using (public.can_access_plant(plant))
   with check (public.can_access_plant(plant));
+
+drop policy if exists "entries deletable by admin" on public.entries;
+create policy "entries deletable by admin"
+  on public.entries for delete to authenticated
+  using (public.is_admin());
 
 -- ---------------------------------------------------------------------------
 -- Retire Udupi

@@ -53,8 +53,8 @@ the rules hold even against a hand-crafted API call.
 
 | Role | Can do |
 |---|---|
-| **admin** | See and edit every plant; manage everyone's access on the **Access** tab |
-| **user** | See and edit only the plants granted to them; no Access tab |
+| **admin** | Every tab — Dashboard, Monthly entry, Revenue import, Access — across every plant. Only an admin can import revenue, delete an entry, or change someone's access. |
+| **user** | **Monthly entry only**, and only for the plants granted to them. No dashboard, no revenue import, no access management. |
 
 `jatoth.r@farmley.com` is the bootstrap admin — the account is promoted
 automatically whether it registers before or after the schema is installed.
@@ -65,6 +65,11 @@ The **Access** tab lists every registered user, with a role selector and a plant
 checkbox per user. Two safeguards: you cannot change your own role, and the last
 remaining admin cannot be demoted or deleted (enforced by a database trigger, not
 just the UI).
+
+Deleting an entry is admin-only, and enforced by its own RLS policy rather than by
+hiding a button — a plant operator cannot quietly erase a month they mis-keyed.
+Deleting also rewrites the Google Sheet in full, since the sheet has no delete of
+its own and the row would otherwise linger there.
 
 Plant scoping applies to reads as well as writes — a Kundli manager cannot see
 Indore's numbers on the dashboard, and a revenue import file containing other

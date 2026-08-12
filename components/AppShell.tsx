@@ -6,10 +6,11 @@ import { useState } from "react";
 import Logo from "@/components/Logo";
 import { createClient } from "@/lib/supabase/client";
 
+// Non-admins only ever work in Monthly entry; everything else is admin-only.
 const NAV = [
-  { href: "/dashboard", label: "Dashboard", adminOnly: false },
+  { href: "/dashboard", label: "Dashboard", adminOnly: true },
   { href: "/entry", label: "Monthly entry", adminOnly: false },
-  { href: "/revenue", label: "Revenue import", adminOnly: false },
+  { href: "/revenue", label: "Revenue import", adminOnly: true },
   { href: "/admin", label: "Access", adminOnly: true },
 ];
 
@@ -40,7 +41,7 @@ export default function AppShell({
     <div className="min-h-screen">
       <header className="sticky top-0 z-30 border-b border-navy-100 bg-white/85 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center gap-6 px-5 py-3 sm:px-8">
-          <Link href="/dashboard" className="shrink-0" aria-label="Farmley home">
+          <Link href={isAdmin ? "/dashboard" : "/entry"} className="shrink-0" aria-label="Farmley home">
             <Logo className="hidden h-11 sm:inline-flex" />
             <Logo className="h-10 sm:hidden" compact />
           </Link>

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import DeleteEntryButton from "./DeleteEntryButton";
 import SyncAllButton from "./SyncAllButton";
-import { requireSession } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { formatNumber, formatPercent } from "@/lib/calc";
 import { toMonthLabel } from "@/lib/month";
@@ -42,7 +43,7 @@ function compactCurrency(value: number): string {
 }
 
 export default async function DashboardPage() {
-  const { profile, isAdmin } = await requireSession();
+  const { profile, isAdmin } = await requireAdmin();
   const supabase = await createClient();
 
   // RLS already restricts these rows to the user's granted plants.
@@ -161,7 +162,7 @@ export default async function DashboardPage() {
               <span className="badge-navy">{rows.length} rows</span>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[1120px]">
+              <table className="w-full min-w-[1200px]">
                 <thead className="bg-navy-50/60">
                   <tr>
                     <th className="th">Month</th>
@@ -177,6 +178,7 @@ export default async function DashboardPage() {
                     <th className="th text-right">Fixed</th>
                     <th className="th text-right">Total cost</th>
                     <th className="th text-right">JW % rev</th>
+                    <th className="th text-right">Remove</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-navy-50">
@@ -205,6 +207,13 @@ export default async function DashboardPage() {
                       <td className="td tabular text-right">{formatNumber(num(row.total_cost))}</td>
                       <td className="td tabular text-right font-semibold text-navy-900">
                         {formatPercent(num(row.jw_pct_of_rev))}
+                      </td>
+                      <td className="td text-right">
+                        <DeleteEntryButton
+                          plant={row.plant}
+                          month={row.month}
+                          monthLabel={toMonthLabel(row.month)}
+                        />
                       </td>
                     </tr>
                   ))}

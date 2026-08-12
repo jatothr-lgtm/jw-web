@@ -1,12 +1,12 @@
 import AppShell from "@/components/AppShell";
 import RevenueImport from "./RevenueImport";
-import { requireSession } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import { PLANTS } from "@/lib/mappings";
 
 export const dynamic = "force-dynamic";
 
 export default async function RevenuePage() {
-  const { profile, isAdmin } = await requireSession();
+  const { profile, isAdmin } = await requireAdmin();
 
   const allowedPlants = isAdmin
     ? [...PLANTS]
