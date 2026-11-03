@@ -2,7 +2,8 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isSupabaseConfigured, SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/env";
 
-const PUBLIC_PATHS = ["/login", "/register"];
+// /api/keepalive is hit by the daily Vercel cron with no session.
+const PUBLIC_PATHS = ["/login", "/register", "/api/keepalive"];
 
 type CookieToSet = { name: string; value: string; options?: CookieOptions };
 
